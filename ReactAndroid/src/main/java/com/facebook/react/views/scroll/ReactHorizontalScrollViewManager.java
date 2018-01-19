@@ -9,6 +9,7 @@
 
 package com.facebook.react.views.scroll;
 
+import android.animation.ObjectAnimator;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
 import com.facebook.react.bridge.ReadableArray;
@@ -43,6 +44,7 @@ public class ReactHorizontalScrollViewManager
   };
 
   private @Nullable FpsListener mFpsListener = null;
+  private @Nullable ObjectAnimator mAnimator = null;
 
   public ReactHorizontalScrollViewManager() {
     this(null);
@@ -138,8 +140,8 @@ public class ReactHorizontalScrollViewManager
   @Override
   public void scrollTo(
       ReactHorizontalScrollView scrollView, ReactScrollViewCommandHelper.ScrollToCommandData data) {
-    if (data.mAnimated) {
-      scrollView.smoothScrollTo(data.mDestX, data.mDestY);
+    if (data.mDuration > 0) {
+      animateScroll(scrollView, data.mDestX, data.mDestY, data.mDuration);
     } else {
       scrollView.scrollTo(data.mDestX, data.mDestY);
     }
@@ -152,8 +154,8 @@ public class ReactHorizontalScrollViewManager
     // ScrollView always has one child - the scrollable area
     int right =
       scrollView.getChildAt(0).getWidth() + scrollView.getPaddingRight();
-    if (data.mAnimated) {
-      scrollView.smoothScrollTo(right, scrollView.getScrollY());
+    if (data.mDuration > 0) {
+      animateScroll(scrollView, right, scrollView.getScrollY(), data.mDuration);
     } else {
       scrollView.scrollTo(right, scrollView.getScrollY());
     }
@@ -216,5 +218,12 @@ public class ReactHorizontalScrollViewManager
         color == null ? YogaConstants.UNDEFINED : (float) ((int)color & 0x00FFFFFF);
     float alphaComponent = color == null ? YogaConstants.UNDEFINED : (float) ((int)color >>> 24);
     view.setBorderColor(SPACING_TYPES[index], rgbComponent, alphaComponent);
+  }
+
+  private void animateScroll(ReactHorizontalScrollView view, int mDestX, int mDestY, int mDuration) {
+    if (mAnimator != null) {
+      mAnimator.cancel();
+    }
+    mAnimator = ReactScrollViewHelper.animateScroll(view, mDestX, mDestY, mDuration);
   }
 }

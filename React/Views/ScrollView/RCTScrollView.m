@@ -583,6 +583,20 @@ static inline void RCTApplyTranformationAccordingLayoutDirection(UIView *view, U
   }
 }
 
+- (void)scrollToOffset:(CGPoint)offset duration:(NSTimeInterval)duration
+{
+  if (!CGPointEqualToPoint(_scrollView.contentOffset, offset)) {
+    // UIView *contentView = [self contentView];
+    [UIView animateWithDuration:duration
+          delay:0
+        options:UIViewAnimationOptionBeginFromCurrentState
+     animations:^(void) {
+       [_scrollView setContentOffset:offset];
+     } completion:^(__unused BOOL finished) {
+     }];
+  }
+}
+
 /**
  * If this is a vertical scroll view, scrolls to the bottom.
  * If this is a horizontal scroll view, scrolls to the right.

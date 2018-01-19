@@ -25,6 +25,7 @@ public class ReactScrollViewCommandHelper {
   public static final int COMMAND_SCROLL_TO = 1;
   public static final int COMMAND_SCROLL_TO_END = 2;
   public static final int COMMAND_FLASH_SCROLL_INDICATORS = 3;
+  public static final int LEGACY_ANIMATION_DURATION = 250;
 
   public interface ScrollCommandHandler<T> {
     void scrollTo(T scrollView, ScrollToCommandData data);
@@ -34,13 +35,12 @@ public class ReactScrollViewCommandHelper {
 
   public static class ScrollToCommandData {
 
-    public final int mDestX, mDestY;
-    public final boolean mAnimated;
+    public final int mDestX, mDestY, mDuration;
 
-    ScrollToCommandData(int destX, int destY, boolean animated) {
+    ScrollToCommandData(int destX, int destY, int duration) {
       mDestX = destX;
       mDestY = destY;
-      mAnimated = animated;
+      mDuration = duration;
     }
   }
 
@@ -48,8 +48,8 @@ public class ReactScrollViewCommandHelper {
 
     public final boolean mAnimated;
 
-    ScrollToEndCommandData(boolean animated) {
-      mAnimated = animated;
+    ScrollToEndCommandData(int duration) {
+      mDuration = duration;
     }
   }
 
@@ -75,13 +75,23 @@ public class ReactScrollViewCommandHelper {
       case COMMAND_SCROLL_TO: {
         int destX = Math.round(PixelUtil.toPixelFromDIP(args.getDouble(0)));
         int destY = Math.round(PixelUtil.toPixelFromDIP(args.getDouble(1)));
-        boolean animated = args.getBoolean(2);
-        viewManager.scrollTo(scrollView, new ScrollToCommandData(destX, destY, animated));
+        int duration = 0;
+        if (args.size() == 4 && args.getDouble(3) > 0) {
+          duration = (int) Math.round(args.getDouble(3));
+        } else if (args.getBoolean(2)) {
+          duration = LEGACY_ANIMATION_DURATION;
+        }
+        viewManager.scrollTo(scrollView, new ScrollToCommandData(destX, destY, duration));        
         return;
       }
       case COMMAND_SCROLL_TO_END: {
-        boolean animated = args.getBoolean(0);
-        viewManager.scrollToEnd(scrollView, new ScrollToEndCommandData(animated));
+        int duration = 0;
+        if (args.size() == 2 && args.getDouble(1) > 0) {
+          duration = (int) Math.round(args.getDouble(1));
+        } else if (args.getBoolean(0)) {
+          duration = LEGACY_ANIMATION_DURATION;
+        }
+        viewManager.scrollToEnd(scrollView, new ScrollToEndCommandData(duration));
         return;
       }
       case COMMAND_FLASH_SCROLL_INDICATORS:

@@ -405,26 +405,27 @@ const ScrollResponderMixin = {
    * This is currently used to help focus child TextViews, but can also
    * be used to quickly scroll to any element we want to focus. Syntax:
    *
-   * `scrollResponderScrollTo(options: {x: number = 0; y: number = 0; animated: boolean = true})`
+   * `scrollResponderScrollTo(options: {x: number = 0; y: number = 0; animated: boolean = true, duration: number = 0})`
    *
    * Note: The weird argument signature is due to the fact that, for historical reasons,
    * the function also accepts separate arguments as as alternative to the options object.
    * This is deprecated due to ambiguity (y before x), and SHOULD NOT BE USED.
    */
   scrollResponderScrollTo: function(
-    x?: number | { x?: number, y?: number, animated?: boolean },
+    x?: number | { x?: number, y?: number, animated?: boolean, duration?: number },
     y?: number,
-    animated?: boolean
+    animated?: boolean,
+    duration?: number
   ) {
     if (typeof x === 'number') {
       console.warn('`scrollResponderScrollTo(x, y, animated)` is deprecated. Use `scrollResponderScrollTo({x: 5, y: 5, animated: true})` instead.');
     } else {
-      ({x, y, animated} = x || {});
+      ({x, y, animated, duration} = x || {});
     }
     UIManager.dispatchViewManagerCommand(
       nullthrows(this.scrollResponderGetScrollableNode()),
       UIManager.RCTScrollView.Commands.scrollTo,
-      [x || 0, y || 0, animated !== false],
+      [x || 0, y || 0, animated !== false, duration || 0],
     );
   },
 
@@ -437,14 +438,15 @@ const ScrollResponderMixin = {
    * `scrollResponderScrollToEnd({animated: true})`
    */
   scrollResponderScrollToEnd: function(
-    options?: { animated?: boolean },
+    options?: { animated?: boolean, duration?: boolean },
   ) {
     // Default to true
     const animated = (options && options.animated) !== false;
+    const duration = options ? options.duration || 0 : 0;
     UIManager.dispatchViewManagerCommand(
       this.scrollResponderGetScrollableNode(),
       UIManager.RCTScrollView.Commands.scrollToEnd,
-      [animated],
+      [animated, duration],
     );
   },
 
